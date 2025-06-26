@@ -129,6 +129,7 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       transition: background 0.5s ease;
       animation: fadeInUp 1s forwards;
+      line-height: 1.5;
     }
     body.light-mode .glass-box {
       background: var(--glass-light);
@@ -140,8 +141,8 @@
     .typewriter {
       overflow: hidden;
       border-right: .15em solid orange;
-      white-space: pre-wrap;
-      display: inline-block;
+      white-space: normal;
+      display: block; 
       animation: typing 3s steps(80, end), blink-caret .75s step-end 4;
     }
     @keyframes typing {
