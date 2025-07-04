@@ -139,15 +139,13 @@
       to { opacity: 1; transform: translateY(0); }
     }
     .typewriter {
-      overflow: hidden;
       border-right: .15em solid orange;
       white-space: normal;
-      display: block; 
-      animation: typing 3s steps(80, end), blink-caret .75s step-end 4;
+      display: block;
+      animation: blink-caret .75s step-end infinite;
     }
-    @keyframes typing {
-      from { width: 0 }
-      to { width: 100% }
+    .typewriter.typing {
+      animation: blink-caret .75s step-end infinite;
     }
     @keyframes blink-caret {
       from, to { border-color: transparent }
@@ -319,6 +317,63 @@ I’m building it—one idea at a time.</p>
     document.getElementById('modeToggle').addEventListener('change', () => {
       document.body.classList.toggle('light-mode');
     });
+
+    // True typewriter effect - character by character
+    function typeWriter(element, text, speed = 50, delay = 0) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          element.innerHTML = '';
+          element.classList.add('typing');
+          let i = 0;
+          
+          function type() {
+            if (i < text.length) {
+              // Handle HTML tags properly
+              if (text.charAt(i) === '<') {
+                let tagEnd = text.indexOf('>', i);
+                if (tagEnd !== -1) {
+                  element.innerHTML += text.substring(i, tagEnd + 1);
+                  i = tagEnd + 1;
+                } else {
+                  element.innerHTML += text.charAt(i);
+                  i++;
+                }
+              } else {
+                element.innerHTML += text.charAt(i);
+                i++;
+              }
+              setTimeout(type, speed);
+            } else {
+              resolve();
+            }
+          }
+          type();
+        }, delay);
+      });
+    }
+
+    // Initialize typewriter effects when page loads
+    window.addEventListener('load', () => {
+      const typewriterElements = document.querySelectorAll('.typewriter');
+      let delay = 500; // Initial delay
+      
+      typewriterElements.forEach((element, index) => {
+        const originalText = element.innerHTML;
+        const speed = element.classList.contains('fast') ? 30 : 50; // Allow different speeds
+        
+        // Different delays for different elements
+        if (element.tagName === 'H1') {
+          typeWriter(element, originalText, 100, delay);
+          delay += originalText.length * 100 + 500;
+        } else if (element.tagName === 'H2') {
+          typeWriter(element, originalText, 80, delay);
+          delay += originalText.length * 80 + 300;
+        } else {
+          typeWriter(element, originalText, speed, delay);
+          delay += originalText.length * speed + 200;
+        }
+      });
+    });
   </script>
     <!-- Floating Telegram Icon -->
   <a href="https://t.me/RootDeveloperDS" target="_blank" style="
@@ -335,16 +390,20 @@ I’m building it—one idea at a time.</p>
   </a>
   <script>
     // Create bubbles dynamically
-    const bubbleContainer = document.querySelector('.bubbles');
-    for (let i = 0; i < 10; i++) {
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.style.width = `${Math.random() * 100 + 20}px`;
-      bubble.style.height = bubble.style.width;
-      bubble.style.left = `${Math.random() * 100}%`;
-      bubble.style.animationDelay = `${Math.random() * 10}s`;
-      bubbleContainer.appendChild(bubble);
-    }
+    window.addEventListener('load', () => {
+      const bubbleContainer = document.querySelector('.bubbles');
+      for (let i = 0; i < 15; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        const size = Math.random() * 80 + 20;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.animationDelay = `${Math.random() * 10}s`;
+        bubble.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        bubbleContainer.appendChild(bubble);
+      }
+    });
   </script>
 
 </body>
