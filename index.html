@@ -369,8 +369,11 @@ I’m building it—one idea at a time.</p>
           typeWriter(element, originalText, 80, delay);
           delay += originalText.length * 80 + 300;
         } else {
-          typeWriter(element, originalText, speed, delay);
-          delay += originalText.length * speed + 200;
+          // Make long paragraphs (like about us) type faster
+          const isLongParagraph = originalText.length > 200;
+          const actualSpeed = isLongParagraph ? 20 : speed; // Much faster for long text
+          typeWriter(element, originalText, actualSpeed, delay);
+          delay += originalText.length * actualSpeed + 200;
         }
       });
     });
