@@ -143,9 +143,15 @@
       white-space: normal;
       display: block;
       animation: blink-caret .75s step-end infinite;
+      opacity: 0; /* Hide initially until ready to type */
     }
     .typewriter.typing {
       animation: blink-caret .75s step-end infinite;
+      opacity: 1; /* Show when typing starts */
+    }
+    .typewriter.completed {
+      opacity: 1; /* Show when typing is completed */
+      border-right: none; /* Remove caret when done */
     }
     @keyframes blink-caret {
       from, to { border-color: transparent }
@@ -319,63 +325,81 @@ I’m building it—one idea at a time.</p>
     });
 
     // True typewriter effect - character by character
-    function typeWriter(element, text, speed = 50, delay = 0) {
+    function typeWriter(element, text, speed = 30) {
       return new Promise((resolve) => {
-        setTimeout(() => {
-          element.innerHTML = '';
-          element.classList.add('typing');
-          let i = 0;
-          
-          function type() {
-            if (i < text.length) {
-              // Handle HTML tags properly
-              if (text.charAt(i) === '<') {
-                let tagEnd = text.indexOf('>', i);
-                if (tagEnd !== -1) {
-                  element.innerHTML += text.substring(i, tagEnd + 1);
-                  i = tagEnd + 1;
-                } else {
-                  element.innerHTML += text.charAt(i);
-                  i++;
-                }
+        element.innerHTML = '';
+        element.classList.add('typing');
+        let i = 0;
+        
+        function type() {
+          if (i < text.length) {
+            // Handle HTML tags properly
+            if (text.charAt(i) === '<') {
+              let tagEnd = text.indexOf('>', i);
+              if (tagEnd !== -1) {
+                element.innerHTML += text.substring(i, tagEnd + 1);
+                i = tagEnd + 1;
               } else {
                 element.innerHTML += text.charAt(i);
                 i++;
               }
-              setTimeout(type, speed);
             } else {
-              resolve();
+              element.innerHTML += text.charAt(i);
+              i++;
             }
+            setTimeout(type, speed);
+          } else {
+            element.classList.remove('typing');
+            element.classList.add('completed');
+            resolve();
           }
-          type();
-        }, delay);
+        }
+        type();
       });
     }
 
-    // Initialize typewriter effects when page loads
-    window.addEventListener('load', () => {
-      const typewriterElements = document.querySelectorAll('.typewriter');
-      let delay = 500; // Initial delay
+    // Initialize typewriter effects when page loads with proper sequencing
+    window.addEventListener('load', async () => {
+      // Wait a moment before starting
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      typewriterElements.forEach((element, index) => {
-        const originalText = element.innerHTML;
-        const speed = element.classList.contains('fast') ? 30 : 50; // Allow different speeds
-        
-        // Different delays for different elements
-        if (element.tagName === 'H1') {
-          typeWriter(element, originalText, 100, delay);
-          delay += originalText.length * 100 + 500;
-        } else if (element.tagName === 'H2') {
-          typeWriter(element, originalText, 80, delay);
-          delay += originalText.length * 80 + 300;
-        } else {
-          // Make long paragraphs (like about us) type faster
-          const isLongParagraph = originalText.length > 200;
-          const actualSpeed = isLongParagraph ? 20 : speed; // Much faster for long text
-          typeWriter(element, originalText, actualSpeed, delay);
-          delay += originalText.length * actualSpeed + 200;
+      // Define the sequence of elements to type
+      const aboutUsName = document.querySelector('.glass-box h1.typewriter');
+      const aboutUsParagraph = document.querySelector('.glass-box p.typewriter');
+      const skillsHeading = document.querySelector('.glass-box h2.typewriter');
+      const projectsHeading = document.querySelectorAll('.glass-box h2.typewriter')[1];
+      
+      // Store original text
+      const elements = [aboutUsName, aboutUsParagraph, skillsHeading, projectsHeading];
+      const originalTexts = elements.map(el => el ? el.innerHTML : '');
+      
+      try {
+        // 1. Type the name first (faster speed)
+        if (aboutUsName) {
+          await typeWriter(aboutUsName, originalTexts[0], 40);
+          await new Promise(resolve => setTimeout(resolve, 300)); // Brief pause
         }
-      });
+        
+        // 2. Type the About Us paragraph (faster speed for long text)
+        if (aboutUsParagraph) {
+          await typeWriter(aboutUsParagraph, originalTexts[1], 15);
+          await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause
+        }
+        
+        // 3. Type Skills heading
+        if (skillsHeading) {
+          await typeWriter(skillsHeading, originalTexts[2], 35);
+          await new Promise(resolve => setTimeout(resolve, 300)); // Brief pause
+        }
+        
+        // 4. Type Projects heading
+        if (projectsHeading) {
+          await typeWriter(projectsHeading, originalTexts[3], 35);
+        }
+        
+      } catch (error) {
+        console.error('Typewriter animation error:', error);
+      }
     });
   </script>
     <!-- Floating Telegram Icon -->
